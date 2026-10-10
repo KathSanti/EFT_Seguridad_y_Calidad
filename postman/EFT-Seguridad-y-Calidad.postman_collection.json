@@ -190,7 +190,7 @@
     },
     {
       "name": "Usuarios",
-      "description": "GET /usuarios -> solo ROLE_ADMIN. POST /register -> referenciado en WebSecurityConfig pero AÚN NO implementado en UserController (hoy solo expone el GET). Se deja la request lista para cuando se implemente; por ahora espera 404.",
+      "description": "GET /usuarios y POST /register -> ambos solo ROLE_ADMIN.",
       "item": [
         {
           "name": "Listar usuarios (ROLE_ADMIN)",
@@ -205,7 +205,7 @@
           }
         },
         {
-          "name": "Registrar usuario (NO implementado aún - 404 esperado)",
+          "name": "Registrar usuario (ROLE_ADMIN)",
           "request": {
             "method": "POST",
             "header": [
@@ -221,7 +221,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["register"]
             },
-            "description": "WebSecurityConfig protege POST /register con ROLE_ADMIN, pero no hay ningún @PostMapping(\"/register\") implementado en el código todavía. Esta request queda como placeholder."
+            "description": "Crea un usuario nuevo. El rol debe ser uno de ROLE_ADMIN, ROLE_ASISTENTE, ROLE_DOCTOR o ROLE_USER (validado con @Pattern). Si el username ya existe, responde 400."
           }
         }
       ]
