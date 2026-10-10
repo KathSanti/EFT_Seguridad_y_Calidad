@@ -1,0 +1,17 @@
+# Build de Maven
+target/
+
+# Logs
+backend.log
+backend.log.*
+*.log
+
+# macOS
+.DS_Store
+
+# IDE (por si acaso)
+.vscode/
+.idea/
+
+# Archivos temporales de Office
+~$*

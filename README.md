@@ -4,10 +4,10 @@
 
 **Levantar contenedores (MySQL, SonarQube, Backend)**
 Levanta los servicios en segundo plano y fuerza la reconstrucción de las imágenes:
+
 ```bash
 docker-compose up -d --build
 ```
-Lanzar Proyecto
 
 # Ejecutar Análisis Estático (SonarQube)
 Envía el reporte de calidad al servidor local (puerto 9000). Reemplaza TU_TOKEN_AQUI con tu Global Analysis Token:
@@ -16,7 +16,19 @@ Envía el reporte de calidad al servidor local (puerto 9000). Reemplaza TU_TOKEN
 ./mvnw clean verify sonar:sonar -DskipTests -Dsonar.projectKey=backend -Dsonar.host.url=http://localhost:9000 -Dsonar.login=REEMPLAZAR-TOKEN
 ```
 
-## Control de Acceso Basado en Roles (RBAC)
+# Análisis Dinámico (DAST) con OWASP ZAP
+
+Se ejecutó un análisis dinámico sobre la aplicación en ejecución utilizando OWASP ZAP, levantado como contenedor Docker en modo *daemon* (sin interfaz gráfica), controlado mediante su API REST. 
+
+- El escaneo generó un reporte HTML con el detalle de los hallazgos, disponible en: 
+[`zap-report/reporte-zap-eft.html`](zap-report/reporte-zap-eft.html) 
+
+- El detalle de cómo se levantó está documentado en:[`zap-report/README.md`](zap-report/README.md)
+
+
+## Control de Acceso Basado en Roles (RBAC) - POSTMAN
+
+En la raíz del proyecto se incluyen las colecciones de Postman para probar los distintos recursos de la API. Cada colección utiliza la variable `{{baseUrl}}` para facilitar la ejecución de las peticiones.
 
 La API está protegida mediante autenticación *Stateless* con JSON Web Tokens (JWT). Los accesos a los endpoints se dividen según el rol del usuario autenticado:
 
@@ -26,7 +38,7 @@ La API está protegida mediante autenticación *Stateless* con JSON Web Tokens (
 | `/usuarios`, `/register` | Solo `ROLE_ADMIN` | Solo `ROLE_ADMIN` |
 | `/patient/**` | Cualquier usuario autenticado | `ROLE_ADMIN`, `ROLE_ASISTENTE` |
 | `/appointment/**` | Cualquier usuario autenticado | `ROLE_ADMIN`, `ROLE_ASISTENTE` |
-| `/medication/**` | Cualquier usuario autenticado | `ROLE_ADMIN`, `ROLE_ASISTENTE` |
+| `/medication/**` | Cualquier usuario autenticado | `ROLE_ADMIN`, `ROLE_DOCTOR` |
 | `/care/**` | Cualquier usuario autenticado | `ROLE_ADMIN`, `ROLE_ASISTENTE` |
 | `/invoice/**` | Cualquier usuario autenticado | `ROLE_ADMIN`, `ROLE_ASISTENTE` |
 
@@ -47,20 +59,3 @@ Durante el desarrollo, se refactorizó el código basándose en el análisis est
 * **Protección contra asignación masiva (Patrón DTO):** Se implementaron clases `record` (Ej: `InvoiceCreateDto`) para desacoplar las entidades JPA de los controladores REST. Esto evita la exposición directa de la base de datos y previene que un atacante sobrescriba campos críticos (como `id` o estados lógicos).
 * **Falso Positivo CSRF Documentado:** SonarQube alertó sobre la desactivación de la protección CSRF (`.csrf.disable()`). Esto se documenta como un riesgo aceptado (falso positivo) ya que la arquitectura es una API REST *Stateless* basada en tokens JWT. Al no utilizar cookies de sesión manejadas automáticamente por el navegador web, el vector de ataque CSRF no es viable en esta fase.
 
-## Usuarios de Prueba (Postman)
-
-Para probar los diferentes niveles de acceso de la API (RBAC), la base de datos se inicializa automáticamente con los siguientes usuarios. 
-
-| Usuario (`user`) | Contraseña (`encryptedPass`) | Rol Asignado | Descripción de Permisos |
-| :--- | :--- | :--- | :--- |
-| `admin` | `123` | `ROLE_ADMIN` | **Acceso Total.** Puede crear usuarios, registrar medicamentos y gestionar todos los módulos. |
-| `asistente` | `123` | `ROLE_ASISTENTE` | **Gestión Clínica.** Puede crear, modificar y eliminar pacientes, citas y facturas. No administra usuarios. |
-| `cliente` | `123` | `ROLE_USER` | **Solo Lectura.** Puede consultar información (GET) en rutas permitidas, pero será bloqueado si intenta modificar o crear datos. |
-
-### ¿Cómo probar en Postman?
-1. Realiza una petición `POST` a `http://localhost:8180/login`.
-2. En la pestaña **Params** o **Body (x-www-form-urlencoded)**, envía las credenciales:
-   - `user`: (elige uno de la tabla, ej. `admin`)
-   - `encryptedPass`: `123`
-3. Copia el token JWT devuelto en la respuesta (el texto que empieza después de "Bearer ").
-4. Para consumir los demás endpoints (ej. `/patient`), ve a la pestaña **Authorization**, selecciona el tipo **Bearer Token** y pega tu token.
