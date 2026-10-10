@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InvoiceController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">backend</a> &gt; <a href="index.source.html" class="el_package">com.duoc.backend.Invoice</a> &gt; <span class="el_source">InvoiceController.java</span></div><h1>InvoiceController.java</h1><pre class="source lang-java linenums">package com.duoc.backend.Invoice;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.duoc.backend.Care.Care;
+import com.duoc.backend.Invoice.dto.InvoiceCreateDto;
+import com.duoc.backend.Medication.Medication;
+
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping(&quot;/invoice&quot;)
+public class InvoiceController {
+
+    private final InvoiceService invoiceService;
+
+<span class="fc" id="L28">    public InvoiceController(InvoiceService invoiceService) {</span>
+<span class="fc" id="L29">        this.invoiceService = invoiceService;</span>
+<span class="fc" id="L30">    }</span>
+
+    @GetMapping
+    public List&lt;Invoice&gt; getAllInvoices() {
+<span class="fc" id="L34">        return invoiceService.getAllInvoices();</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    public Invoice getInvoiceById(@PathVariable Long id) {
+<span class="nc" id="L39">        return invoiceService.getInvoiceById(id);</span>
+    }
+
+    @PostMapping
+    @PreAuthorize(&quot;hasAnyAuthority('ROLE_ADMIN', 'ROLE_ASISTENTE')&quot;)
+    public Invoice saveInvoice(@Valid @RequestBody InvoiceCreateDto dto) {
+        
+<span class="fc" id="L46">        Invoice safeInvoice = new Invoice();</span>
+        
+<span class="fc" id="L48">        safeInvoice.setPatientName(dto.patientName());</span>
+<span class="fc" id="L49">        safeInvoice.setDate(dto.date());</span>
+<span class="fc" id="L50">        safeInvoice.setTime(dto.time());</span>
+
+        // Mapear ids a objetos Care
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        if (dto.careIds() != null) {</span>
+<span class="fc" id="L54">            safeInvoice.setCares(dto.careIds().stream().map(id -&gt; {</span>
+<span class="fc" id="L55">                Care care = new Care();</span>
+<span class="fc" id="L56">                care.setId(id);</span>
+<span class="fc" id="L57">                return care;</span>
+<span class="fc" id="L58">            }).collect(Collectors.toList()));</span>
+        } else {
+<span class="fc" id="L60">            safeInvoice.setCares(new ArrayList&lt;&gt;());</span>
+        }
+
+        // Mapear ids a objetos Medication
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if (dto.medicationIds() != null) {</span>
+<span class="fc" id="L65">            safeInvoice.setMedications(dto.medicationIds().stream().map(id -&gt; {</span>
+<span class="fc" id="L66">                Medication med = new Medication();</span>
+<span class="fc" id="L67">                med.setId(id);</span>
+<span class="fc" id="L68">                return med;</span>
+<span class="fc" id="L69">            }).collect(Collectors.toList()));</span>
+        } else {
+<span class="fc" id="L71">            safeInvoice.setMedications(new ArrayList&lt;&gt;());</span>
+        }
+
+<span class="fc" id="L74">        return invoiceService.saveInvoice(safeInvoice);</span>
+    } 
+    
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    public void deleteInvoice(@PathVariable Long id) {
+<span class="fc" id="L80">        invoiceService.deleteInvoice(id);</span>
+<span class="fc" id="L81">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

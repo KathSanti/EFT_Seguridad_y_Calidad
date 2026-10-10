@@ -1,0 +1,50 @@
+services:
+  # Base de Datos MySQL
+  base-de-datos:
+    image: mysql:8.0
+    container_name: mysql-semana9
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Backend Spring Boot
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend-semana9
+    depends_on:
+      base-de-datos:
+        condition: service_healthy
+    environment:
+      DB_HOST: base-de-datos
+      DB_PORT: 3306
+      DB_USER: myuser
+      DB_PASSWORD: password
+    ports:
+      - "8180:8180"
+
+  # SonarQube para el análisis de código
+  sonarqube:
+    image: sonarqube:lts-community
+    container_name: sonarqube-server
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_FORCEAUTHENTICATION=false
+    restart: always
+
+volumes:
+  mysql-data:

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Constants.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">backend</a> &gt; <a href="index.source.html" class="el_package">com.duoc.backend</a> &gt; <span class="el_source">Constants.java</span></div><h1>Constants.java</h1><pre class="source lang-java linenums">package com.duoc.backend;
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+
+<span class="nc" id="L8">public class Constants {</span>
+
+    // Spring Security
+    public static final String LOGIN_URL = &quot;/login&quot;;
+    public static final String HEADER_AUTHORIZACION_KEY = &quot;Authorization&quot;;
+    public static final String TOKEN_BEARER_PREFIX = &quot;Bearer &quot;;
+
+    // JWT
+    public static final String ISSUER_INFO = &quot;https://www.duocuc.cl/&quot;;
+    public static final long TOKEN_EXPIRATION_TIME = 864_000_000; // 1 day
+
+    public static Key getSigningKeyB64(String secret) {
+<span class="nc" id="L20">        byte[] keyBytes = Decoders.BASE64.decode(secret);</span>
+<span class="nc" id="L21">        return Keys.hmacShaKeyFor(keyBytes);</span>
+    }
+
+    public static Key getSigningKey(String secret) {
+<span class="fc" id="L25">        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);</span>
+<span class="fc" id="L26">        return Keys.hmacShaKeyFor(keyBytes);</span>
+    }
+
+    public static final String ROL_ADMIN = &quot;ROLE_ADMIN&quot;;
+    public static final String ROL_ASISTENTE = &quot;ROLE_ASISTENTE&quot;;
+    public static final String ROL_DOCTOR = &quot;ROLE_DOCTOR&quot;;
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

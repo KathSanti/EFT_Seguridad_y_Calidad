@@ -1,0 +1,15 @@
+com/duoc/backend/Medication/MedicationServiceTest.class
+com/duoc/backend/BackendApplicationTests.class
+com/duoc/backend/user/UserControllerTest.class
+com/duoc/backend/Appointment/AppointmentControllerTest.class
+com/duoc/backend/Invoice/InvoiceControllerTest.class
+com/duoc/backend/LoginControllerTest.class
+com/duoc/backend/Patient/PatientControllerTest.class
+com/duoc/backend/MyUserDetailsServiceTest.class
+com/duoc/backend/Appointment/AppointmentServiceTest.class
+com/duoc/backend/JWTAuthenticationConfigTest.class
+com/duoc/backend/Medication/MedicationControllerTest.class
+com/duoc/backend/exception/GlobalExceptionHandlerTest.class
+com/duoc/backend/Care/CareControllerTest.class
+com/duoc/backend/Patient/PatientServiceTest.class
+com/duoc/backend/Invoice/InvoiceServiceTest.class

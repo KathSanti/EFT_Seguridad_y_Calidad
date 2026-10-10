@@ -1,0 +1,561 @@
+{
+  "info": {
+    "_postman_id": "b1c4b9f0-2e1d-4b6b-8a2e-9f2d2b7c1a01",
+    "name": "EFT Seguridad y Calidad - Backend Clínica Veterinaria",
+    "description": "Colección para probar la API de la Clínica Veterinaria (Spring Boot + JWT + RBAC).\n\n1. Corre cualquiera de las requests de la carpeta **Auth** (admin / asistente / doctor / cliente) para obtener un token JWT: el test script lo guarda automáticamente en la variable de colección `token`.\n2. El resto de las carpetas usan ese `token` como Bearer Auth heredado de la colección.\n3. Usuarios de prueba (todos con contraseña `123`): `admin` (ROLE_ADMIN), `asistente` (ROLE_ASISTENTE), `doctor` (ROLE_DOCTOR), `cliente` (ROLE_USER).\n4. Importa también el archivo `EFT-Seguridad-y-Calidad.postman_environment.json` y selecciónalo como entorno activo (define `baseUrl`).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{token}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8180", "type": "default" },
+    { "key": "token", "value": "", "type": "default" },
+    { "key": "patientId", "value": "1", "type": "default" },
+    { "key": "appointmentId", "value": "1", "type": "default" },
+    { "key": "medicationId", "value": "1", "type": "default" },
+    { "key": "careId", "value": "1", "type": "default" },
+    { "key": "invoiceId", "value": "1", "type": "default" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "description": "POST /login. Es público (permitAll). Devuelve el JWT como texto plano en el body de la respuesta. El test script de cada request lo guarda en la variable de colección `token` para que las demás carpetas lo usen automáticamente.",
+      "item": [
+        {
+          "name": "Login - admin (ROLE_ADMIN)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "user", "value": "admin", "type": "text" },
+                { "key": "encryptedPass", "value": "123", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["login"]
+            },
+            "description": "Acceso total: usuarios, pacientes, citas, medicamentos, cuidados, facturas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login OK (200)', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('token', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - asistente (ROLE_ASISTENTE)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "user", "value": "asistente", "type": "text" },
+                { "key": "encryptedPass", "value": "123", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["login"]
+            },
+            "description": "Gestión clínica: puede crear/modificar/eliminar pacientes, citas, medicamentos, cuidados y facturas. No administra usuarios."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login OK (200)', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('token', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - cliente (ROLE_USER)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "user", "value": "cliente", "type": "text" },
+                { "key": "encryptedPass", "value": "123", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["login"]
+            },
+            "description": "Solo lectura (GET). Usa este login para probar que los POST/PUT/DELETE le devuelven 403 Forbidden."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login OK (200)', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('token', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - doctor (ROLE_DOCTOR)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "user", "value": "doctor", "type": "text" },
+                { "key": "encryptedPass", "value": "123", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["login"]
+            },
+            "description": "Puede crear/modificar/eliminar Medication junto con ROLE_ADMIN. No tiene acceso de escritura a Invoice (eso es de ASISTENTE+ADMIN)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login OK (200)', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('token', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - credenciales inválidas (401 esperado)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "user", "value": "admin", "type": "text" },
+                { "key": "encryptedPass", "value": "clave-incorrecta", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["login"]
+            },
+            "description": "Debe fallar con BadCredentialsException. Útil para probar el BCryptPasswordEncoder."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "description": "GET /usuarios -> solo ROLE_ADMIN. POST /register -> referenciado en WebSecurityConfig pero AÚN NO implementado en UserController (hoy solo expone el GET). Se deja la request lista para cuando se implemente; por ahora espera 404.",
+      "item": [
+        {
+          "name": "Listar usuarios (ROLE_ADMIN)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Registrar usuario (NO implementado aún - 404 esperado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"nuevo_asistente\",\n    \"email\": \"nuevo@veterinaria.cl\",\n    \"password\": \"123\",\n    \"role\": \"ROLE_ASISTENTE\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["register"]
+            },
+            "description": "WebSecurityConfig protege POST /register con ROLE_ADMIN, pero no hay ningún @PostMapping(\"/register\") implementado en el código todavía. Esta request queda como placeholder."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Patient",
+      "description": "GET -> cualquier usuario autenticado. POST/PUT -> solo ROLE_ADMIN o ROLE_ASISTENTE.",
+      "item": [
+        {
+          "name": "Listar pacientes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/patient", "host": ["{{baseUrl}}"], "path": ["patient"] }
+          }
+        },
+        {
+          "name": "Obtener paciente por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/patient/{{patientId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["patient", "{{patientId}}"]
+            }
+          }
+        },
+        {
+          "name": "Crear paciente (ROLE_ADMIN / ROLE_ASISTENTE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Firulais\",\n    \"species\": \"Perro\",\n    \"breed\": \"Labrador\",\n    \"age\": 3,\n    \"owner\": \"Juan Pérez\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/patient", "host": ["{{baseUrl}}"], "path": ["patient"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('patientId', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desactivar paciente (ROLE_ADMIN / ROLE_ASISTENTE)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/patient/disable/{{patientId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["patient", "disable", "{{patientId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Appointment",
+      "description": "GET -> cualquier usuario autenticado. POST/DELETE -> solo ROLE_ADMIN o ROLE_ASISTENTE.",
+      "item": [
+        {
+          "name": "Listar citas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/appointment", "host": ["{{baseUrl}}"], "path": ["appointment"] }
+          }
+        },
+        {
+          "name": "Obtener cita por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/appointment/{{appointmentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["appointment", "{{appointmentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Crear cita (ROLE_ADMIN / ROLE_ASISTENTE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"date\": \"2026-10-20\",\n    \"time\": \"10:30:00\",\n    \"reason\": \"Control anual\",\n    \"veterinarian\": \"Dra. Soto\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/appointment", "host": ["{{baseUrl}}"], "path": ["appointment"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('appointmentId', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar cita (ROLE_ADMIN / ROLE_ASISTENTE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/appointment/{{appointmentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["appointment", "{{appointmentId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Medication",
+      "description": "GET -> cualquier usuario autenticado. POST/DELETE -> solo ROLE_ADMIN o ROLE_DOCTOR (ROLE_ASISTENTE ya no tiene acceso de escritura aquí).",
+      "item": [
+        {
+          "name": "Listar medicamentos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/medication", "host": ["{{baseUrl}}"], "path": ["medication"] }
+          }
+        },
+        {
+          "name": "Obtener medicamento por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/medication/{{medicationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["medication", "{{medicationId}}"]
+            }
+          }
+        },
+        {
+          "name": "Crear medicamento (ROLE_ADMIN / ROLE_DOCTOR)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Antibiótico (Amoxicilina)\",\n    \"cost\": 22500\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/medication", "host": ["{{baseUrl}}"], "path": ["medication"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('medicationId', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar medicamento (ROLE_ADMIN / ROLE_DOCTOR)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/medication/{{medicationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["medication", "{{medicationId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Care",
+      "description": "GET -> cualquier usuario autenticado. POST/DELETE -> solo ROLE_ADMIN o ROLE_ASISTENTE.",
+      "item": [
+        {
+          "name": "Listar cuidados",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/care", "host": ["{{baseUrl}}"], "path": ["care"] }
+          }
+        },
+        {
+          "name": "Obtener cuidado por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/care/{{careId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["care", "{{careId}}"]
+            }
+          }
+        },
+        {
+          "name": "Crear cuidado (ROLE_ADMIN / ROLE_ASISTENTE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Consulta General\",\n    \"cost\": 30000\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/care", "host": ["{{baseUrl}}"], "path": ["care"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('careId', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar cuidado (ROLE_ADMIN / ROLE_ASISTENTE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/care/{{careId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["care", "{{careId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invoice",
+      "description": "GET -> cualquier usuario autenticado. POST/DELETE -> solo ROLE_ADMIN o ROLE_ASISTENTE (antes este módulo no tenía regla propia en WebSecurityConfig; ya quedó corregido). careIds/medicationIds son opcionales y referencian ids ya creados en Care/Medication. El entorno ya trae 3 facturas de ejemplo precargadas (ids 1-3) vía init.sql.",
+      "item": [
+        {
+          "name": "Listar facturas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/invoice", "host": ["{{baseUrl}}"], "path": ["invoice"] }
+          }
+        },
+        {
+          "name": "Obtener factura por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/invoice/{{invoiceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoice", "{{invoiceId}}"]
+            }
+          }
+        },
+        {
+          "name": "Crear factura (ROLE_ADMIN / ROLE_ASISTENTE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"patientName\": \"Firulais\",\n    \"date\": \"2026-10-20\",\n    \"time\": \"11:00:00\",\n    \"careIds\": [{{careId}}],\n    \"medicationIds\": [{{medicationId}}]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/invoice", "host": ["{{baseUrl}}"], "path": ["invoice"] },
+            "description": "Crea primero un Care y un Medication (sus requests ya guardan careId/medicationId automáticamente) para que esta factura los referencie con ids reales."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('invoiceId', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar factura (ROLE_ADMIN / ROLE_ASISTENTE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/invoice/{{invoiceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoice", "{{invoiceId}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

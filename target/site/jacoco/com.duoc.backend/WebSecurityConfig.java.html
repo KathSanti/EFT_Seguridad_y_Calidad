@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WebSecurityConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">backend</a> &gt; <a href="index.source.html" class="el_package">com.duoc.backend</a> &gt; <span class="el_source">WebSecurityConfig.java</span></div><h1>WebSecurityConfig.java</h1><pre class="source lang-java linenums">package com.duoc.backend;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@EnableWebSecurity()
+@EnableMethodSecurity
+@Configuration
+@Profile(&quot;default&quot;)
+class WebSecurityConfig{
+
+    
+    private final JWTAuthorizationFilter jwtAuthorizationFilter;
+
+<span class="fc" id="L23">    public WebSecurityConfig(JWTAuthorizationFilter jwtAuthorizationFilter) {</span>
+<span class="fc" id="L24">        this.jwtAuthorizationFilter = jwtAuthorizationFilter;</span>
+<span class="fc" id="L25">    }</span>
+
+    @Bean
+    public SecurityFilterChain configure(HttpSecurity http) throws Exception {
+
+<span class="fc" id="L30">        http</span>
+<span class="fc" id="L31">                .csrf(csrf -&gt; csrf.disable())</span>
+                // Forzar que la API sea sin estado ignora las cookies JSESSIONID
+<span class="fc" id="L33">                .sessionManagement(session -&gt; session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</span>
+                
+<span class="fc" id="L35">                .authorizeHttpRequests( authz -&gt; authz</span>
+                        
+<span class="fc" id="L37">                        .requestMatchers(HttpMethod.POST, Constants.LOGIN_URL).permitAll()</span>
+<span class="fc" id="L38">                        .requestMatchers(HttpMethod.GET, Constants.LOGIN_URL).permitAll()</span>
+<span class="fc" id="L39">                        .requestMatchers(HttpMethod.GET, &quot;/usuarios&quot;).hasAuthority(Constants.ROL_ADMIN)</span>
+<span class="fc" id="L40">                        .requestMatchers(HttpMethod.POST, &quot;/register&quot;).hasAuthority(Constants.ROL_ADMIN)</span>
+
+                        // Pacientes solo Lectura para cualquier usuario autenticado
+<span class="fc" id="L43">                        .requestMatchers(HttpMethod.GET, &quot;/patient/**&quot;).authenticated()</span>
+                        // Solo Admin y Asistente pueden modificar, crear o borrar citas en cualquier ruta /patient/**
+<span class="fc" id="L45">                        .requestMatchers(&quot;/patient/**&quot;).hasAnyAuthority(Constants.ROL_ADMIN, Constants.ROL_ASISTENTE)</span>
+
+                        // Citas solo lectura para cualquier usuario autenticado
+<span class="fc" id="L48">                        .requestMatchers(HttpMethod.GET, &quot;/appointment/**&quot;).authenticated()</span>
+                        // Solo Admin y Asistente pueden modificar, crear o borrar citas en cualquier ruta /appointment/**
+<span class="fc" id="L50">                        .requestMatchers(&quot;/appointment/**&quot;).hasAnyAuthority(Constants.ROL_ADMIN, Constants.ROL_ASISTENTE)</span>
+
+<span class="fc" id="L52">                        .requestMatchers(HttpMethod.GET, &quot;/medication/**&quot;).authenticated()</span>
+<span class="fc" id="L53">                        .requestMatchers(&quot;/medication/**&quot;).hasAnyAuthority(Constants.ROL_ADMIN, Constants.ROL_DOCTOR)</span>
+
+<span class="fc" id="L55">                        .requestMatchers(HttpMethod.GET, &quot;/care/**&quot;).authenticated()</span>
+<span class="fc" id="L56">                        .requestMatchers(&quot;/care/**&quot;).hasAnyAuthority(Constants.ROL_ADMIN, Constants.ROL_ASISTENTE)</span>
+
+<span class="fc" id="L58">                        .requestMatchers(HttpMethod.GET, &quot;/invoice/**&quot;).authenticated()</span>
+<span class="fc" id="L59">                        .requestMatchers(&quot;/invoice/**&quot;).hasAnyAuthority(Constants.ROL_ADMIN, Constants.ROL_ASISTENTE)</span>
+
+<span class="fc" id="L61">                        .anyRequest().authenticated())</span>
+<span class="fc" id="L62">                .addFilterAfter(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);</span>
+                
+<span class="fc" id="L64">        return http.build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Invoice.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">backend</a> &gt; <a href="index.source.html" class="el_package">com.duoc.backend.Invoice</a> &gt; <span class="el_source">Invoice.java</span></div><h1>Invoice.java</h1><pre class="source lang-java linenums">package com.duoc.backend.Invoice;
+
+import com.duoc.backend.Care.Care;
+import com.duoc.backend.Medication.Medication;
+
+import jakarta.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+@Entity
+<span class="fc" id="L12">public class Invoice {</span>
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String patientName;
+    private LocalDate date;
+    private LocalTime time;
+
+    @ManyToMany
+    @JoinTable(
+        name = &quot;invoice_cares&quot;,
+        joinColumns = @JoinColumn(name = &quot;invoice_id&quot;),
+        inverseJoinColumns = @JoinColumn(name = &quot;care_id&quot;)
+    )
+    private List&lt;Care&gt; cares;
+
+
+    @ManyToMany
+    @JoinTable(
+        name = &quot;invoice_medications&quot;,
+        joinColumns = @JoinColumn(name = &quot;invoice_id&quot;),
+        inverseJoinColumns = @JoinColumn(name = &quot;medication_id&quot;)
+    )
+    private List&lt;Medication&gt; medications;
+
+
+    private Double totalCost;
+
+    // Getters and Setters
+    public Long getId() {
+<span class="fc" id="L42">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L46">        this.id = id;</span>
+<span class="fc" id="L47">    }</span>
+
+    public String getPatientName() {
+<span class="fc" id="L50">        return patientName;</span>
+    }
+
+    public void setPatientName(String patientName) {
+<span class="fc" id="L54">        this.patientName = patientName;</span>
+<span class="fc" id="L55">    }</span>
+
+    public LocalDate getDate() {
+<span class="fc" id="L58">        return date;</span>
+    }
+
+    public void setDate(LocalDate date) {
+<span class="fc" id="L62">        this.date = date;</span>
+<span class="fc" id="L63">    }</span>
+
+    public LocalTime getTime() {
+<span class="fc" id="L66">        return time;</span>
+    }
+
+    public void setTime(LocalTime time) {
+<span class="fc" id="L70">        this.time = time;</span>
+<span class="fc" id="L71">    }</span>
+
+    public List&lt;Care&gt; getCares() {
+<span class="fc" id="L74">        return cares;</span>
+    }
+
+    public void setCares(List&lt;Care&gt; cares) {
+<span class="fc" id="L78">        this.cares = cares;</span>
+<span class="fc" id="L79">    }</span>
+
+    public List&lt;Medication&gt; getMedications() {
+<span class="fc" id="L82">        return medications;</span>
+    }
+
+    public void setMedications(List&lt;Medication&gt; medications) {
+<span class="fc" id="L86">        this.medications = medications;</span>
+<span class="fc" id="L87">    }</span>
+
+    public Double getTotalCost() {
+<span class="fc" id="L90">        return totalCost;</span>
+    }
+
+    public void setTotalCost(Double totalCost) {
+<span class="fc" id="L94">        this.totalCost = totalCost;</span>
+<span class="fc" id="L95">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

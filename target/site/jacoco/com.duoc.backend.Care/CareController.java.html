@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CareController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">backend</a> &gt; <a href="index.source.html" class="el_package">com.duoc.backend.Care</a> &gt; <span class="el_source">CareController.java</span></div><h1>CareController.java</h1><pre class="source lang-java linenums">package com.duoc.backend.Care;
+
+import java.util.List;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.duoc.backend.Care.dto.CareCreateDto;
+import com.duoc.backend.exception.ResourceNotFoundException;
+
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping(&quot;/care&quot;)
+public class CareController {
+
+    private final CareRepository careRepository;
+
+<span class="fc" id="L25">    public CareController(CareRepository careRepository) {</span>
+<span class="fc" id="L26">        this.careRepository = careRepository;</span>
+<span class="fc" id="L27">    }</span>
+
+
+    @GetMapping
+    public List&lt;Care&gt; getAllCares() {
+<span class="fc" id="L32">        return careRepository.findAll();</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    public Care getCareById(@PathVariable Long id) {
+<span class="fc" id="L37">        return careRepository.findById(id)</span>
+<span class="fc" id="L38">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Cuidado no encontrado con id: &quot; + id));</span>
+    }
+
+
+    @PostMapping
+    @PreAuthorize(&quot;hasAnyAuthority('ROLE_ADMIN', 'ROLE_ASISTENTE')&quot;)
+    public Care saveCare(@Valid @RequestBody CareCreateDto dto) {
+        
+<span class="fc" id="L46">        Care safeCare = new Care();</span>
+        
+        // Solo permitimos que se escriban los datos del formulario (DTO)
+<span class="fc" id="L49">        safeCare.setName(dto.name());</span>
+<span class="fc" id="L50">        safeCare.setCost(dto.cost());</span>
+        
+        // No tocamos ni el id reponsabilidad exclusiva del servidor
+
+<span class="fc" id="L54">        return careRepository.save(safeCare);</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    public void deleteCare(@PathVariable Long id) {
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        if (!careRepository.existsById(id)) {</span>
+<span class="fc" id="L60">            throw new ResourceNotFoundException(&quot;Cuidado no encontrado con id: &quot; + id);</span>
+        }
+<span class="fc" id="L62">        careRepository.deleteById(id);</span>
+<span class="fc" id="L63">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

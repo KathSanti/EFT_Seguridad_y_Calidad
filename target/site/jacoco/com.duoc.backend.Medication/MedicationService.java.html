@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MedicationService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">backend</a> &gt; <a href="index.source.html" class="el_package">com.duoc.backend.Medication</a> &gt; <span class="el_source">MedicationService.java</span></div><h1>MedicationService.java</h1><pre class="source lang-java linenums">package com.duoc.backend.Medication;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.duoc.backend.exception.ResourceNotFoundException;
+
+@Service
+public class MedicationService {
+
+
+    private MedicationRepository medicationRepository;
+
+<span class="fc" id="L15">    public MedicationService(MedicationRepository medicationRepository) {</span>
+<span class="fc" id="L16">        this.medicationRepository = medicationRepository;</span>
+<span class="fc" id="L17">    }</span>
+
+    public List&lt;Medication&gt; getAllMedications() {
+<span class="fc" id="L20">        return medicationRepository.findAll();</span>
+    }
+
+    public Medication getMedicationById(Long id) {
+<span class="fc" id="L24">        return medicationRepository.findById(id)</span>
+<span class="fc" id="L25">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Medicamento no encontrado con id: &quot; + id));</span>
+    }
+
+    public Medication saveMedication(Medication medication) {
+<span class="fc" id="L29">        return medicationRepository.save(medication);</span>
+    }
+
+    public void deleteMedication(Long id) {
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        if (!medicationRepository.existsById(id)) {</span>
+<span class="fc" id="L34">            throw new ResourceNotFoundException(&quot;Medicamento no encontrado con id: &quot; + id);</span>
+        }
+<span class="fc" id="L36">        medicationRepository.deleteById(id);</span>
+<span class="fc" id="L37">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MedicationController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">backend</a> &gt; <a href="index.source.html" class="el_package">com.duoc.backend.Medication</a> &gt; <span class="el_source">MedicationController.java</span></div><h1>MedicationController.java</h1><pre class="source lang-java linenums">package com.duoc.backend.Medication;
+
+import java.util.List;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.duoc.backend.Medication.dto.MedicationCreateDto;
+
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping(&quot;/medication&quot;)
+public class MedicationController {
+
+    private final MedicationService medicationService;
+    
+<span class="fc" id="L24">    public MedicationController(MedicationService medicationService) {</span>
+<span class="fc" id="L25">        this.medicationService = medicationService;</span>
+<span class="fc" id="L26">    }</span>
+
+    @GetMapping
+    public List&lt;Medication&gt; getAllMedications() {
+<span class="fc" id="L30">        return medicationService.getAllMedications();</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    public Medication getMedicationById(@PathVariable Long id) {
+<span class="nc" id="L35">        return medicationService.getMedicationById(id);</span>
+    }
+    @PostMapping
+    @PreAuthorize(&quot;hasAnyAuthority('ROLE_ADMIN', 'ROLE_DOCTOR')&quot;)
+    public Medication saveMedication(@Valid @RequestBody MedicationCreateDto dto) {
+        
+<span class="fc" id="L41">        Medication safeMedication = new Medication();</span>
+        
+        // Solo permitimos que se escriban los datos del formulario (DTO)
+<span class="fc" id="L44">        safeMedication.setName(dto.name());</span>
+<span class="fc" id="L45">        safeMedication.setCost(dto.cost());</span>
+        
+        // No tocamos ni el id reponsabilidad exclusiva del servidor
+
+<span class="fc" id="L49">        return medicationService.saveMedication(safeMedication);</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    public void deleteMedication(@PathVariable Long id) {
+<span class="fc" id="L54">        medicationService.deleteMedication(id);</span>
+<span class="fc" id="L55">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

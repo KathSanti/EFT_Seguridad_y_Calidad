@@ -1,0 +1,7 @@
+.git
+target
+backend.log
+backend.log.*
+*.gz
+.DS_Store
+carpeta sin título
